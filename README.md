@@ -1,2 +1,2 @@
 # datapick
-Retrieve and manipulate data based on YAML description file
+Retrieve and manipulate data based on YAML description file.

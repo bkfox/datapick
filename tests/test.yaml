@@ -1,0 +1,13 @@
+emma:
+    name: goldman
+    age: 23
+    friends:
+    - !property 0.alexander
+    - johann
+alexander:
+    name: berkman
+    friends: !property
+      - !property 0.emma.friends.1
+      - !re.replace ["johann", "johann betrayed"]
+shadow: !property 0.emma
+
