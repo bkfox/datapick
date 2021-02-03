@@ -79,6 +79,8 @@ Note: infinite recursion is not handled yet.
 # Goals
 **Application:**
 - load, save, run commands
+- generate documentation
+- plugins
 - interactive command line interface
 
 **Library:**
