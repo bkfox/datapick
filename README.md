@@ -24,7 +24,7 @@ shadow: !property 0.emma
 
 Will be evaluated as:
 
-```
+```yaml
 emma:
     name: goldman
     age: 23
