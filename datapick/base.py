@@ -62,10 +62,12 @@ class Filters(Function):
 
 class Property(Filters):
     """
-    Evaluates a result without calling arguments. Result can be filtered
-    using multiple filters, and is cached.
+    From a source (data path or Source), retrieve and apply filters to
+    result.
 
-    Source is evaluated using `eval(*args, **kwargs)`. 
+    Property must be evaluable without calling arguments.
+
+    Source is evaluated using `eval(*self.args, **self.kwargs)`.
     """
     yaml_tag = '!property'
     source = None
@@ -77,51 +79,53 @@ class Property(Filters):
         self.args, self.kwargs = args or {}, kwargs or {}
         super().__init__(*filters)
 
-    async def eval(self, engine, no_cache=True):
+    async def eval_source(self, engine, no_cache=True, **kwargs):
+        source = await engine.resolve(self.source, no_cache=no_cache) \
+            if isinstance(self.source, str) else self.source
+        return await engine.eval(source, *self.args, no_cache=no_cache,
+                                 **self.kwargs)
+
+    async def eval(self, engine, no_cache=True, **kwargs):
         if no_cache or self.result is None:
-            source = await engine.resolve(self.source, no_cache=no_cache) \
-                if isinstance(self.source, str) else self.source
-            data = await engine.eval(source, *self.args, no_cache=no_cache,
-                                     **self.kwargs)
+            data = await self.eval_source(engine, no_cache=no_cache, **kwargs)
             self.result = await super().eval(engine, data)
         return self.result
 
 
 class Status(IntEnum):
-    Empty = 0x00
     Fetching = 0x01
     Fetched = 0x02
     Error = 0x10
-    NotFound = 0x11
 
 
 class Source(Property):
-    """ Base class used as source of data. """
+    """
+    Provides data from an external source.
+    """
     status = Status.Empty
 
-    async def fetch(self):
+    async def fetch(self, source):
         """
         Fetch and return data from source. Raise `Status` when an error
         occurs.
         """
         return None
 
-    async def eval(self, engine, *args, no_cache=False, **kwargs):
+    async def eval_source(self, engine, **kwargs):
         if self.status == Status.Fetching:
             # if already fetching, await for the result to be fetched
             while self.status == Status.Fetching:
                 await asyncio.sleep(0)
             return self.result
-        if self.status == Status.Empty or no_cache:
-            self.status = Status.Fetching
-            try:
-                self.result = await self.fetch()
-                self.status = Status.Fetched
-            except Exception as err:
-                self.status = Status.Error
-                raise err
-        else:
-            return self.result
+
+        self.status = Status.Fetching
+        try:
+            # TODO: source from arg
+            self.status = Status.Fetched
+            return await self.fetch(self.source)
+        except Exception as err:
+            self.status = Status.Error
+            raise err
 
 
 class Eval(Function):

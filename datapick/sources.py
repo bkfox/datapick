@@ -14,11 +14,8 @@ class File(Source):
     yaml_tag = '!file'
     chunk_size = 1024*256
 
-    def __init__(self, path):
-        self.path = path
-
-    async def fetch(self):
-        with open(self.path) as file:
+    async def fetch(self, source):
+        with open(source) as file:
             chunk = file.read(self.chunk_size)
             buffer = chunk
             while len(chunk) == self.chunk_size:
@@ -38,8 +35,8 @@ class Include(File):
     def __init__(self, path):
         self.path = path
 
-    async def fetch(self):
-        buffer = await super().fetch()
+    async def fetch(self, source):
+        buffer = await super().fetch(source)
         return yaml.load(buffer, yaml.Loader)
 
 
@@ -47,19 +44,14 @@ class Http(Source):
     """ Data source fetched from Http request """
     yaml_tag = '!http'
 
-    session = None
-    url = None
-    headers = None
+    # FIXME: for multiple sources, save self.session
 
-    def __init__(self, url):
-        self.url = url
-
-    async def fetch(self):
+    async def fetch(self, source):
         with aiohttp.ClientSession() as session:
-            async with session.get(self.url) as response:
+            async with session.get(source) as response:
                 self.headers = response.headers
-                if response.status == 200:
-                    return await response.text()
+                return { "headers": response.headers,
+                         "status": response.status,
+                         "data": await response.text() }
                 # TODO: handling redirections
-                raise ConnectionError(response.status, "http response error")
 

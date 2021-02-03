@@ -2,7 +2,7 @@ emma:
     name: goldman
     age: 23
     friends:
-    - !property 0.alexander
+    - !property 0.alexander.name
     - johann
 alexander:
     name: berkman

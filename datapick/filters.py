@@ -63,7 +63,7 @@ class Schema(Function):
     Transform data into dict. Fields are specified as `(key, filter)`
     and generated using `filter`.
     """
-    yaml_tag = '!dict.schema'
+    yaml_tag = '!iter.schema'
 
     fields = []
 
