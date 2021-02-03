@@ -46,15 +46,14 @@ shadow:
 Regarding to builtin library, there still is a lot of functions to be provided.
 Since its boring to implement it, it will be on-need based -> use PR.
 
-** Main features **
+**Main features:**
 - async evaluation of function and properties, with calling arguments.
 - resolve object by path (WIP: dynamic selectors).
 - properties cache results
 
 **Functions:**
-- `!eval`: evaluate another document object by path with calling arguments.
-- `!filters`: filter data over multiple functions.
-- `!property`: dynamic value with optional filters, with cached results.
+- `!filters`: transform data over multiple functions.
+- `!property`: evaluate expression with optional filters, caching results.
 - `!python`: evaluates a python expression
 
 **Sources:**
@@ -83,7 +82,7 @@ Note: infinite recursion is not handled yet.
 - plugins
 - interactive command line interface
 
-**Library:**
+**Function:**
 - well featured for data manipulation
 - save data to file
 - file manipulation and synchronization (using rsync)

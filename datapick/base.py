@@ -4,7 +4,7 @@ import yaml
 
 __all__ = ('Function', 'Filters', 'Property',
            'Status', 'Source',
-           'Eval', 'PyEval')
+           'Python')
 
 
 class Function(yaml.YAMLObject):
@@ -79,6 +79,7 @@ class Property(Filters):
         self.args, self.kwargs = args or {}, kwargs or {}
         super().__init__(*filters)
 
+    # TODO: args and kwargs from kwargs
     async def eval_source(self, engine, no_cache=True, **kwargs):
         source = await engine.resolve(self.source, no_cache=no_cache) \
             if isinstance(self.source, str) else self.source
@@ -93,6 +94,7 @@ class Property(Filters):
 
 
 class Status(IntEnum):
+    Empty = 0x00
     Fetching = 0x01
     Fetched = 0x02
     Error = 0x10
@@ -128,19 +130,7 @@ class Source(Property):
             raise err
 
 
-class Eval(Function):
-    """ Evaluate a function by path. """
-    yaml_tag = '!eval'
-    path = ''
-
-    def __init__(self, path):
-        self.path = path
-
-    async def eval(self, engine, **kwargs):
-        return await engine.eval_path(self.path, *args, **kwargs)
-
-
-class PyEval(Function):
+class Python(Function):
     """
     Compile and call python expression, eval's `kwargs` will be used as
     local namespace.

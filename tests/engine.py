@@ -5,7 +5,7 @@ from datapick.engine import *
 import datapick.filters
 
 
-__all__ = ('TestEngine',)
+__all__ = ('BaseTestEngine', 'TestEngine',)
 
 
 class BaseTestEngine(IsolatedAsyncioTestCase):
@@ -38,7 +38,7 @@ class TestEngine(BaseTestEngine):
         shadow = await self.engine.eval(self.shadow, flat=True)
         self.assertEqual(shadow["name"], self.emma["name"])
         self.assertEqual(shadow["age"], self.emma["age"])
-        self.assertEqual(shadow["friends"][0]["name"], self.alexander["name"])
+        self.assertEqual(shadow["friends"][0], self.alexander["name"])
 
     async def test_resolve(self):
         item = await self.engine.resolve('0.emma.name')
